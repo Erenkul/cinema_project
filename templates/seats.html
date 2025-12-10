@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Selection - {{ movie_title }}</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-primary text-gray-200">
+    <custom-navbar></custom-navbar>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Progress Bar -->
+        <div class="mb-12">
+            <div class="flex justify-center mb-4">
+                <div class="flex items-center">
+                    {% for step, label in [('1','Movie'), ('2','Time'), ('3','Seats'), ('4','Checkout')] %}
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full {{ 'bg-secondary text-white font-bold' if step != '4' else 'bg-gray-700 text-gray-400' }} flex items-center justify-center">
+                            {{ step }}
+                        </div>
+                        <span class="mt-2 text-sm {{ 'text-white font-medium' if step == '3' else 'text-gray-400' }}">{{ label }}</span>
+                    </div>
+                    {% if step != '4' %}
+                    <div class="w-16 h-1 bg-gray-700 mx-2"></div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Seat Section -->
+            <div class="lg:w-2/3">
+                <h2 class="text-3xl font-bold mb-8">Select Your Seats</h2>
+
+                <div class="bg-gray-900 rounded-xl p-6 mb-6 shadow-xl">
+                    <h3 class="text-xl font-semibold mb-2">{{ movie_title }}</h3>
+                    <div class="text-gray-400 mb-4">{{ theater_name }} • {{ show_time }}</div>
+
+                    <div class="relative overflow-x-auto">
+                        <!-- Screen -->
+                        <div class="w-full bg-gradient-to-r from-gray-700 to-gray-800 text-center py-2 mb-8 rounded-sm">
+                            <span class="text-gray-300 font-medium">SCREEN</span>
+                        </div>
+
+                        <!-- Dynamic Seat Grid -->
+                        <div class="flex justify-center">
+                            <div class="grid grid-cols-10 gap-2">
+                                {% for row in seat_rows %}
+                                    <div class="col-span-10 text-center text-gray-400 mb-2">{{ row.row_label }}</div>
+                                    {% for seat in row.seats %}
+                                        {% if seat.status == 'available' %}
+                                            <button onclick="toggleSeatSelection(this)" 
+                                                    class="w-8 h-8 bg-available rounded-sm flex items-center justify-center "
+                                                    data-seat="{{ seat.code }}">{{ seat.number }}</button>
+                                        {% elif seat.status == 'reserved' %}
+                                            <button class="w-8 h-8 bg-reserved rounded-sm flex items-center justify-center cursor-not-allowed" 
+                                                    data-seat="{{ seat.code }}">{{ seat.number }}</button>
+                                        {% elif seat.status == 'selected' %}
+                                            <button class="w-8 h-8 bg-selected rounded-sm flex items-center justify-center" 
+                                                    data-seat="{{ seat.code }}">{{ seat.number }}</button>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="flex justify-center gap-6 mb-8">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-available rounded-sm mr-2"></div>
+                        <span class="text-gray-400 text-sm">Available</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-selected rounded-sm mr-2"></div>
+                        <span class="text-gray-400 text-sm">Selected</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-reserved rounded-sm mr-2"></div>
+                        <span class="text-gray-400 text-sm">Reserved</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="lg:w-1/3">
+                <div class="bg-gray-900 rounded-xl p-6 shadow-xl sticky top-6">
+                    <h3 class="text-xl font-semibold mb-6">Order Summary</h3>
+
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-400 mb-2">{{ movie_title }}</h4>
+                        <div class="text-sm text-gray-500 mb-1">{{ theater_name }}</div>
+                        <div class="text-sm text-gray-500">{{ show_time }}</div>
+                    </div>
+
+                    <form action="{{ url_for('checkout') }}" method="POST">
+                        <input type="hidden" name="movie_id" value="{{ movie_id }}">
+                        <input type="hidden" id="selected_seats" name="selected_seats">
+
+                        <div class="border-t border-gray-800 pt-4 mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-400">Ticket Price</span>
+                                <span>${{ ticket_price }}</span>
+                            </div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-400">Service Fee</span>
+                                <span>${{ service_fee }}</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-800 pt-4 mb-6">
+                            <div class="flex justify-between font-semibold text-lg">
+                                <span>Total</span>
+                                <span>${{ total_price }}</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="block w-full bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium text-center transition-all shadow-lg hover:shadow-xl glow-on-hover mb-4">
+                            Continue to Checkout
+                        </button>
+                    </form>
+
+                    <div class="text-center text-gray-500 text-xs">
+                        By proceeding, you agree to our 
+                        <a href="#" class="text-gray-400 hover:underline">Terms of Service</a> and 
+                        <a href="#" class="text-gray-400 hover:underline">Privacy Policy</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <custom-footer></custom-footer>
+
+    <script src="{{ url_for('static', filename='js/components/navbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/footer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>feather.replace();</script>
+</body>
+</html>

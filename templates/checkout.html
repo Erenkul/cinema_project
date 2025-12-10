@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - {{ movie_title }}</title>
+
+    <!-- Tailwind + Feather -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-primary text-gray-200">
+    <custom-navbar></custom-navbar>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Booking Progress -->
+        <div class="mb-12">
+            <div class="flex justify-center mb-4">
+                <div class="flex items-center">
+                    {% for step, label in [('1','Movie'), ('2','Time'), ('3','Seats'), ('4','Checkout')] %}
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full {{ 'bg-secondary text-white font-bold' if step != '4' else 'bg-secondary text-white font-bold' }} flex items-center justify-center">
+                            {{ step }}
+                        </div>
+                        <span class="mt-2 text-sm {{ 'text-white font-medium' if step == '4' else 'text-gray-400' }}">{{ label }}</span>
+                    </div>
+                    {% if step != '4' %}
+                    <div class="w-16 h-1 bg-gray-700 mx-2"></div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Checkout Form -->
+            <div class="lg:w-2/3">
+                <h2 class="text-3xl font-bold mb-8">Complete Your Booking</h2>
+
+                <form action="{{ url_for('confirm_payment') }}" method="POST">
+                    <input type="hidden" name="movie_id" value="{{ movie_id }}">
+                    <input type="hidden" name="selected_seats" value="{{ selected_seats }}">
+
+                    <!-- Personal Info -->
+                    <div class="bg-gray-900 rounded-xl p-6 mb-8 shadow-xl">
+                        <h3 class="text-xl font-semibold mb-6">Personal Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-gray-400 mb-2">First Name</label>
+                                <input type="text" name="first_name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-2">Last Name</label>
+                                <input type="text" name="last_name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Email</label>
+                            <input type="email" name="email" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Phone</label>
+                            <input type="tel" name="phone" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                        </div>
+                    </div>
+
+                    <!-- Payment Info -->
+                    <div class="bg-gray-900 rounded-xl p-6 shadow-xl mb-8">
+                        <h3 class="text-xl font-semibold mb-6">Payment Information</h3>
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Card Number</label>
+                            <input type="text" name="card_number" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-gray-400 mb-2">Expiry Date</label>
+                                <input type="text" name="expiry" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="MM/YY" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-2">CVV</label>
+                                <input type="text" name="cvv" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" placeholder="123" required>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-400 mb-2">Name on Card</label>
+                            <input type="text" name="name_on_card" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="block w-full bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium text-center transition-all shadow-lg hover:shadow-xl glow-on-hover mb-4">
+                        Confirm Payment
+                    </button>
+                </form>
+            </div>
+
+            <!-- Summary -->
+            <div class="lg:w-1/3">
+                <div class="bg-gray-900 rounded-xl p-6 shadow-xl sticky top-6">
+                    <h3 class="text-xl font-semibold mb-6">Order Summary</h3>
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-400 mb-2">{{ movie_title }}</h4>
+                        <div class="text-sm text-gray-500 mb-1">{{ theater_name }}</div>
+                        <div class="text-sm text-gray-500 mb-1">{{ show_time }}</div>
+                        <div class="text-sm text-gray-500">Seats: {{ selected_seats }}</div>
+                    </div>
+                    <div class="border-t border-gray-800 pt-4 mb-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-400">Tickets</span>
+                            <span>${{ ticket_total }}</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-400">Service Fee</span>
+                            <span>${{ service_fee }}</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-800 pt-4 mb-6">
+                        <div class="flex justify-between font-semibold text-lg">
+                            <span>Total</span>
+                            <span>${{ total_price }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <custom-footer></custom-footer>
+
+    <script src="{{ url_for('static', filename='js/components/navbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/footer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>feather.replace();</script>
+</body>
+</html>

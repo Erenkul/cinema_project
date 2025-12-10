@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERN Cinema - Halloween Specials</title>
+    
+    <!-- Tailwind + Feather -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+    
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-primary text-gray-200">
+    <!-- Navbar component -->
+    <custom-navbar></custom-navbar>
+    
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="relative mb-16 rounded-xl overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-primary/90 to-transparent z-10"></div>
+            <img src="{{ url_for('static', filename='images/halloween_horror_nights_2023_wallpaper_by_thekingblader995_dgcnl7v-pre.jpg') }}"
+            alt="Cinema Background" class="w-full h-96 object-cover">
+            <div class="absolute inset-0 flex items-center z-20 px-8">
+                <div class="max-w-2xl">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Halloween Horror Nights</h1>
+                    <p class="text-xl mb-6">Experience the thrill of our spooky movie selections this October</p>
+                    <a href="#movies" class="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl">Explore Movies</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Now Showing -->
+        <section id="movies" class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 flex items-center">
+                <i data-feather="film" class="mr-2"></i> Now Showing
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {% for movie in now_showing %}
+                <a href="{{ url_for('details', movie_id=movie[0]) }}" class="group">
+                    <div class="bg-gray-900 rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                        <div class="relative overflow-hidden h-64">
+                            <img src="{{ movie[4] }}" alt="Movie Poster" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                <button class="bg-secondary hover:bg-secondary/90 text-white px-4 py-2 rounded-lg font-medium transition-all">View Details</button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-xl font-semibold mb-1">{{ movie[1] }}</h3>
+                            <div class="flex items-center text-gray-400 text-sm">
+                                <span class="mr-2">{{ movie[2] }}</span>
+                                <span>•</span>
+                                <span class="ml-2">{{ movie[3] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Coming Soon -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 flex items-center">
+                <i data-feather="calendar" class="mr-2"></i> Coming Soon
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {% for movie in coming_soon %}
+                <div class="bg-gray-900 rounded-lg overflow-hidden border-l-4 border-accent">
+                    <div class="h-48 overflow-hidden">
+                        <img src="{{ movie[3] }}" alt="Coming Soon Poster" class="w-full h-full object-cover opacity-70">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold mb-1">{{ movie[1] }}</h3>
+                        <div class="flex items-center text-gray-400 text-sm mb-2">
+                            <span>Releasing {{ movie[2] }}</span>
+                        </div>
+                        <button class="text-accent hover:text-accent/90 font-medium flex items-center">
+                            <i data-feather="bell" class="w-4 h-4 mr-1"></i> Notify Me
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer component -->
+    <custom-footer></custom-footer>
+
+    <!-- Local JS -->
+    <script src="{{ url_for('static', filename='js/components/navbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/footer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <!-- Feather icons -->
+    <script>feather.replace();</script>
+</body>
+</html>

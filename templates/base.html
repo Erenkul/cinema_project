@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+            extend: {
+                colors: {
+                primary: '#000000',        // 🔥 Tam siyah
+                secondary: '#e53e3e',      // Kırmızı
+                accent: '#ed8936',         // Turuncu
+                available: '#2d3748',
+                selected: '#e53e3e',
+                reserved: '#4a5568'
+                }
+            }
+            }
+        }
+    </script>
+
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sinema Rezervasyon Sistemi{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <span class="brand-icon">🎬</span>
+                <span class="brand-text">CineMax</span>
+            </a>
+            
+            <ul class="navbar-menu">
+                <li><a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Ana Sayfa</a></li>
+                <li><a href="/movies" class="{% if request.endpoint == 'movies' %}active{% endif %}">Filmler</a></li>
+                <li><a href="/customers" class="{% if request.endpoint == 'customers' or request.endpoint == 'add_customer' %}active{% endif %}">Müşteriler</a></li>
+                <li><a href="/reservations" class="{% if request.endpoint == 'reservations' %}active{% endif %}">Rezervasyonlar</a></li>
+                <li><a href="/reports" class="{% if request.endpoint == 'reports' %}active{% endif %}">Raporlar</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {% if category == 'success' %}✅{% endif %}
+                        {% if category == 'error' %}❌{% endif %}
+                        {% if category == 'warning' %}⚠️{% endif %}
+                        {% if category == 'info' %}ℹ️{% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2025 CineMax Sinema Rezervasyon Sistemi</p>
+            <p>CMPE341 Database Project</p>
+        </div>
+    </footer>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+      {% for category, message in messages %}
+        <div class="px-4 py-3 rounded-lg shadow-lg 
+                    {% if category == 'success' %}bg-green-600{% else %}bg-red-600{% endif %} 
+                    text-white text-sm">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ movie[1] }} - ERN </title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-primary text-gray-200">
+    <custom-navbar></custom-navbar>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Movie Details -->
+        <section class="mb-16">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Poster -->
+                <div class="lg:w-1/3">
+                    <div class="bg-gray-900 rounded-xl overflow-hidden shadow-xl">
+                        <img src="{{ movie[7] }}" alt="{{movie[1]}}" 
+                        class="w-full h-96 object-cover rounded-xl shadow-lg mb-6">
+                    </div>
+                </div>
+                
+                <!-- Movie Info -->
+                <div class="lg:w-2/3">
+                    <div class="mb-6">
+                        <h1 class="text-4xl font-bold mb-2">{{ movie[1] }}</h1>
+                        <div class="flex items-center text-gray-400 mb-4">
+                            <span class="mr-4">{{ movie[2] }}</span>
+                            <span class="mr-4">•</span>
+                            <span class="mr-4">Rated {{ movie[3] }}</span>
+                            <span class="mr-4">•</span>
+                            <span>{{ movie[4] }}</span>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            {% for genre in genres %}
+                            <span class="bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-sm">{{ genre }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="flex items-center mb-6">
+                            <div class="flex items-center mr-6">
+                                <i data-feather="star" class="text-yellow-400 mr-1"></i>
+                                <span class="font-medium">{{ movie[6] }}/10</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-feather="clock" class="text-gray-400 mr-1"></i>
+                                <span class="text-gray-400">{{ movie[4] }}</span>
+                            </div>
+                        </div>
+
+                        <p class="text-textMedium mb-6 leading-relaxed">
+                            {{ movie[7] }}
+                        </p>
+
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-2">Director</h3>
+                            <p class="text-textLight">{{ movie[8] }}</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-2">Cast</h3>
+                            <p class="text-gray-300">{{ movie[9] }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="{{ url_for('seats', movie_id=movie[0]) }}" class="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium text-center transition-all shadow-lg hover:shadow-xl glow-on-hover">
+                            Book Tickets Now
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=LifqWf0BAOA" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-all text-center inline-flex items-center justify-center">
+                            <i data-feather="play" class="mr-2"></i> Watch Trailer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Similar Movies -->
+        <section>
+            <h2 class="text-3xl font-bold mb-8 flex items-center">
+                <i data-feather="thumbs-up" class="mr-2"></i> You May Also Like
+            </h2>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                {% for sm in similar_movies %}
+                <a href="{{ url_for('details', movie_id=sm[0]) }}" class="group">
+                    <div class="bg-gray-900 rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                        <div class="relative overflow-hidden h-48">
+                            <img src="{{ sm[4] }}" alt="Movie Poster" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold mb-1">{{ sm[1] }}</h3>
+                            <div class="flex items-center text-gray-400 text-sm">
+                                <span>{{ sm[2] }}</span>
+                                <span class="mx-1">•</span>
+                                <span>{{ sm[3] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <custom-footer></custom-footer>
+
+    <script src="{{ url_for('static', filename='js/components/navbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/footer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>feather.replace();</script>
+</body>
+</html>

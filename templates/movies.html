@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Film Yönetimi - Dark Reel Cinema Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="bg-primary text-gray-200 fog-effect overflow-y-auto" style="height: auto;">
+
+  <custom-navbar></custom-navbar>
+
+  <main class="container mx-auto px-4 py-12 max-w-7xl">
+    <div class="mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">🎬 Film Kataloğu</h1>
+      <p class="text-gray-400">Kayıtlı tüm filmleri görüntüleyin ve yönetin</p>
+    </div>
+
+    <!-- Üst Bar -->
+    <div class="card p-4 mb-6">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="w-full md:w-96 relative">
+          <input id="searchInput" type="text" placeholder="Film ara..." class="search-box w-full pl-10" />
+          <i data-feather="search" class="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+        <a href="{{ url_for('add_movie') }}" class="btn-primary flex items-center glow-on-hover">
+          <i data-feather="plus" class="w-5 h-5 mr-2"></i> Yeni Film Ekle
+        </a>
+      </div>
+    </div>
+
+    <!-- Film Tablosu -->
+    <div class="card overflow-hidden fog-effect mb-8">
+      <div class="overflow-x-auto">
+        <table class="table-dark w-full">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Film Adı</th>
+              <th>Yönetmen</th>
+              <th>Süre</th>
+              <th>Tür</th>
+              <th>Yaş Sınırı</th>
+              <th>Vizyona Giriş</th>
+              <th class="text-center">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody id="movieTableBody">
+            {% if movies %}
+              {% for m in movies %}
+              <tr>
+                <td class="font-mono text-gray-400">{{ m.MOVIE_ID }}</td>
+                <td class="font-medium text-white">{{ m.TITLE }}</td>
+                <td>{{ m.DIRECTOR or '-' }}</td>
+                <td>{{ m.DURATION_MINUTES }} dk</td>
+                <td>{{ m.GENRE or 'Belirtilmemiş' }}</td>
+                <td><span class="halloween-badge">{{ m.AGE_RATING or 'Genel' }}</span></td>
+                <td>{{ m.RELEASE_DATE }}</td>
+                <td>
+                  <div class="flex justify-center gap-2">
+                    <a href="{{ url_for('details', movie_id=m.MOVIE_ID) }}" class="action-btn action-btn-view" title="Detay"> 
+                      <i data-feather="eye"></i>
+                    </a>
+                    <a href="/movies/update/{{ m.MOVIE_ID }}" class="action-btn action-btn-edit" title="Düzenle">
+                      <i data-feather="edit-2"></i>
+                    </a>
+                    <a href="/movies/delete/{{ m.MOVIE_ID }}" class="action-btn action-btn-delete" 
+                       onclick="return confirm('{{ m.TITLE|e }} filmini silmek istediğinizden emin misiniz?')"
+                       title="Sil">
+                       <i data-feather="trash-2"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center py-8 text-gray-400">
+                  🎬 Henüz kayıtlı film bulunmamaktadır.<br>
+                  <a href="{{ url_for('add_movie') }}" class="btn-primary mt-4 inline-block">İlk Filmi Ekleyin</a>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    {% if movies %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Toplam film -->
+      <div class="card text-center p-6">
+        <h3 class="text-4xl font-bold text-accent mb-2">{{ movies|length }}</h3>
+        <p class="text-gray-400">Toplam Film</p>
+      </div>
+
+      <!-- Ortalama Süre -->
+      <div class="card text-center p-6">
+        {% set ns = namespace(total=0, count=0) %}
+        {% for m in movies %}
+          {% if m.DURATION_MINUTES is not none %}
+            {% set ns.total = ns.total + m.DURATION_MINUTES %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {% set avg_dur = (ns.total / ns.count) if ns.count else 0 %}
+        <h3 class="text-4xl font-bold text-secondary mb-2">{{ avg_dur|round(0)|int }}</h3>
+        <p class="text-gray-400">Ortalama Süre (dk)</p>
+      </div>
+
+      <!-- Tür Sayısı -->
+      <div class="card text-center p-6">
+        <h3 class="text-4xl font-bold text-orange-400 mb-2">
+          {{ movies|map(attribute='GENRE')|reject('equalto', None)|unique|list|length }}
+        </h3>
+        <p class="text-gray-400">Farklı Tür</p>
+      </div>
+    </div>
+    {% endif %}
+  </main>
+
+  <custom-footer></custom-footer>
+
+  <script src="{{ url_for('static', filename='js/components/navbar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/components/footer.js') }}"></script>
+  <script>
+    feather.replace();
+
+    // Search filter
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('movieTableBody');
+
+    searchInput.addEventListener('input', function() {
+      const term = this.value.toLowerCase();
+      for (const row of tableBody.querySelectorAll('tr')) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? '' : 'none';
+      }
+    });
+  </script>
+</body>
+</html>

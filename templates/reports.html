@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Raporlar ve Analizler - Sinema Rezervasyon Sistemi{% endblock %}
+
+{% block content %}
+
+<!-- Genel İstatistikler -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">📊 Genel İstatistikler</h2>
+    </div>
+    
+    <div class="stats-grid">
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">📈 Bu Ay</h3>
+            <p style="font-size: 2rem; font-weight: bold; color: var(--dark); margin: 0;">{{ monthly_reservations }}</p>
+            <p style="color: #666; margin-top: 0.5rem;">Rezervasyon</p>
+        </div>
+
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: var(--success); margin-bottom: 1rem;">💰 Gelir</h3>
+            <p style="font-size: 2rem; font-weight: bold; color: var(--dark); margin: 0;">₺{{ "{:,.2f}".format(monthly_revenue) }}</p>
+            <p style="color: #666; margin-top: 0.5rem;">Bu Ay</p>
+        </div>
+
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: var(--info); margin-bottom: 1rem;">👥 Müşteri</h3>
+            <p style="font-size: 2rem; font-weight: bold; color: var(--dark); margin: 0;">{{ total_customers }}</p>
+            <p style="color: #666; margin-top: 0.5rem;">Toplam</p>
+        </div>
+
+        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: var(--warning); margin-bottom: 1rem;">🎬 Film</h3>
+            <p style="font-size: 2rem; font-weight: bold; color: var(--dark); margin: 0;">{{ total_movies }}</p>
+            <p style="color: #666; margin-top: 0.5rem;">Gösterimde</p>
+        </div>
+    </div>
+</div>
+
+<!-- Film Bazında Performans -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🎬 Film Bazında Performans</h2>
+    </div>
+    
+    {% if movie_performance %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Film Adı</th>
+                    <th>Tür</th>
+                    <th>Rezervasyon</th>
+                    <th>Bilet Sayısı</th>
+                    <th>Toplam Gelir</th>
+                    <th>Ort. Bilet Fiyatı</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movie in movie_performance %}
+                <tr>
+                    <td><strong>{{ movie[0] }}</strong></td>
+                    <td>{{ movie[1] }}</td>
+                    <td>{{ movie[2] }}</td>
+                    <td>{{ movie[3] }}</td>
+                    <td><strong>₺{{ "{:,.2f}".format(movie[4]) }}</strong></td>
+                    <td>₺{{ "{:,.2f}".format(movie[5]) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <p class="empty-text">Henüz performans verisi bulunmamaktadır.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- En Popüler Seans Saatleri -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">⏰ En Popüler Seans Saatleri</h2>
+    </div>
+    
+    {% if showtime_performance %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Saat Aralığı</th>
+                    <th>Rezervasyon</th>
+                    <th>Bilet Sayısı</th>
+                    <th>Toplam Gelir</th>
+                    <th>Ort. Bilet Fiyatı</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for showtime in showtime_performance %}
+                <tr>
+                    <td><strong>{{ showtime[0] }}:00</strong></td>
+                    <td>{{ showtime[1] }}</td>
+                    <td>{{ showtime[2] }}</td>
+                    <td><strong>₺{{ "{:,.2f}".format(showtime[3]) }}</strong></td>
+                    <td>₺{{ "{:,.2f}".format(showtime[3] / showtime[2]) if showtime[2] > 0 else 0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">⏰</div>
+        <p class="empty-text">Henüz seans verisi bulunmamaktadır.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- VIP Müşteriler -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🏆 VIP Müşteriler (Yüksek Harcama)</h2>
+    </div>
+    
+    {% if vip_customers %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Müşteri Adı</th>
+                    <th>Email</th>
+                    <th>Sadakat Puanı</th>
+                    <th>Toplam Rezervasyon</th>
+                    <th>Toplam Harcama</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in vip_customers %}
+                <tr>
+                    <td><strong>{{ customer[0] }}</strong></td>
+                    <td>{{ customer[1] }}</td>
+                    <td><span class="badge badge-warning">{{ customer[2] }} puan</span></td>
+                    <td>{{ customer[3] }}</td>
+                    <td><strong>₺{{ "{:,.2f}".format(customer[4]) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🏆</div>
+        <p class="empty-text">Henüz VIP müşteri verisi bulunmamaktadır.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Salon Doluluk Analizi -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🏢 Salon Doluluk Oranları</h2>
+    </div>
+    
+    {% if hall_occupancy %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Salon Adı</th>
+                    <th>Tip</th>
+                    <th>Kapasite</th>
+                    <th>Toplam Seans</th>
+                    <th>Satılan Bilet</th>
+                    <th>Doluluk Oranı</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hall in hall_occupancy %}
+                <tr>
+                    <td><strong>{{ hall[0] }}</strong></td>
+                    <td>{{ hall[1] }}</td>
+                    <td>{{ hall[2] }}</td>
+                    <td>{{ hall[3] }}</td>
+                    <td>{{ hall[4] }}</td>
+                    <td>
+                        {% set occupancy = (hall[5])|round(1) %}
+                        {% if occupancy >= 80 %}
+                            <span class="badge badge-success">{{ occupancy }}%</span>
+                        {% elif occupancy >= 50 %}
+                            <span class="badge badge-warning">{{ occupancy }}%</span>
+                        {% else %}
+                            <span class="badge badge-danger">{{ occupancy }}%</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🏢</div>
+        <p class="empty-text">Henüz salon verisi bulunmamaktadır.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
